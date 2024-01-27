@@ -5,9 +5,8 @@ namespace App\Http\Controllers\API\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use App\Helpers\ResponseFormatter;
-use App\Helpers\UploadImage;
+use App\Helpers\Documents;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -22,15 +21,10 @@ class AuthController extends Controller
     public function login(Request $request)
     {
 
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
-
-        if ($validator->fails()) {
-            $message = $validator->errors();
-            return ResponseFormatter::validatorError($message);
-        }
 
         $credentials = $request->only('email', 'password');
         $token = Auth::attempt($credentials);
@@ -53,7 +47,7 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
@@ -61,12 +55,8 @@ class AuthController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
 
-        if ($validator->fails()) {
-            return ResponseFormatter::validatorError($validator->errors());
-        }
-
         // get image
-        $uploadImage = new UploadImage();
+        $uploadImage = new Documents();
         $image = $request->file('image');
         $path = 'images/users';
         $name = $request->name . '_' . $request->email;

@@ -4,31 +4,24 @@ namespace App\Http\Controllers\API\Auth;
 
 use App\Helpers\ResponseFormatter;
 use App\Http\Controllers\Controller;
-use App\Models\PasswordResetToken;
 use App\Models\User;
 use App\Models\Verification;
 use App\Notifications\EmailMessage;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password as RulesPassword;
 
 class ResetPassController extends Controller
 {
     public function forgotPassword(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'email' => 'required|email',
         ]);
-
-        if ($validator->fails()) {
-            return ResponseFormatter::validatorError($validator->errors());
-        }
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {
@@ -56,16 +49,12 @@ class ResetPassController extends Controller
 
     public function reset(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'token' => 'required',
             'email' => 'required|email',
             'password' => ['required', 'confirmed', RulesPassword::defaults()],
             'password_confirmation' => 'required|same:password'
         ]);
-
-        if ($validator->fails()) {
-            return ResponseFormatter::validatorError($validator->errors());
-        }
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {

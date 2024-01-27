@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
+use App\Helpers\ResponseFormatter;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Response;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -21,10 +23,23 @@ class Handler extends ExceptionHandler
     /**
      * Register the exception handling callbacks for the application.
      */
-    public function register(): void
+    // public function register(): void
+    // {
+    //     $this->reportable(function (Throwable $e) {
+    //         //
+    //     });
+    // }
+
+    public function render($request, Throwable $e)
     {
-        $this->reportable(function (Throwable $e) {
-            //
-        });
+        if ($request->is('api/*')) {
+            if ($e instanceof \Illuminate\Auth\AuthenticationException) {
+                return ResponseFormatter::responseError(message: 'Anda tidak memiliki izin untuk mengakses resource ini.', code: Response::HTTP_UNAUTHORIZED);
+            } elseif ($e instanceof \Illuminate\Validation\ValidationException) {
+                return ResponseFormatter::validatorError($e->errors());
+            }
+            return ResponseFormatter::responseError(message: $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        return parent::render($request, $e);
     }
 }

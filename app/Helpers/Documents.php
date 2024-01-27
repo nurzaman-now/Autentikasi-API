@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-class UploadImage
+class Documents
 {
   public static function upload($image, $path, $name): string
   {

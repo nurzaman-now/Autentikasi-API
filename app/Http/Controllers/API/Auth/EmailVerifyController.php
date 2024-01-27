@@ -8,7 +8,6 @@ use App\Models\Verification;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class EmailVerifyController extends Controller
 {
@@ -22,14 +21,10 @@ class EmailVerifyController extends Controller
 
     public function verify(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'email' => ['required', 'email', 'exists:users,email'],
             'token' => ['required', 'string', 'min:4', 'max:4'],
         ]);
-
-        if ($validator->fails()) {
-            return ResponseFormatter::responseError(message: $validator->errors()->first());
-        }
 
         $user = User::where('email', $request->email)->first();
         // check user
@@ -58,14 +53,9 @@ class EmailVerifyController extends Controller
 
     public function send(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'email' => ['required', 'email', 'exists:users,email'],
         ]);
-
-        if ($validator->fails()) {
-            return ResponseFormatter::responseError(message: $validator->errors()->first());
-        }
-
 
         $user = User::where('email', $request->email)->first();
 
